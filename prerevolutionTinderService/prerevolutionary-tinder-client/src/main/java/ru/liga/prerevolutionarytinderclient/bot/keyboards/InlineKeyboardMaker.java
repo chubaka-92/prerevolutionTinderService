@@ -7,6 +7,8 @@ import ru.liga.prerevolutionarytinderclient.types.Buttons;
 
 import java.util.ArrayList;
 import java.util.List;
+
+//
 @Component
 public class InlineKeyboardMaker {
 

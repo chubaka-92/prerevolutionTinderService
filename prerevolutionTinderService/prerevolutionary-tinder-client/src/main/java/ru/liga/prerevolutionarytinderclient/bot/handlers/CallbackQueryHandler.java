@@ -12,20 +12,23 @@ import ru.liga.prerevolutionarytinderclient.types.Buttons;
 @Component
 public class CallbackQueryHandler {
 
+
+    //ПОКА НЕ ЮЗАЕМ...хотел..но нафиг)
+
     @Autowired
     ReplyKeyboardMaker replyKeyboardMaker;
     @Autowired
     InlineKeyboardMaker inlineKeyboardMaker;
 
 
-    public BotApiMethod<?> processCallbackQuery(CallbackQuery buttonQuery){
+    public BotApiMethod<?> processCallbackQuery(CallbackQuery buttonQuery) {
         final String chatId = buttonQuery.getMessage().getChatId().toString();
 
         String data = buttonQuery.getData();
 
         if (data.equals(Buttons.SIR.name()) || data.equals(Buttons.MADAM.name())) {
             return getNameProfile(chatId);
-        }else if (data.equals(Buttons.ALL.name())
+        } else if (data.equals(Buttons.ALL.name())
                 || data.equals(Buttons.GENTLEMEN.name())
                 || data.equals(Buttons.LADIES.name())) {
             return getProfile(chatId);

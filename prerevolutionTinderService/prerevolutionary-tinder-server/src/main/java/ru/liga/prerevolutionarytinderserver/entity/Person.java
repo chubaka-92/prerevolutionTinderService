@@ -1,5 +1,18 @@
 package ru.liga.prerevolutionarytinderserver.entity;
 
+import lombok.*;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Table(name = "person")
 public class Person {
     /*
     тут наверное надо подумать над названием сущности...толи форма,толи профиль, толи юзер...или персона
@@ -12,4 +25,13 @@ public class Person {
         Описание...тут надо определиться чо сохранять будим) толи прям текст из тг, толи уже обработаную картинку закодированую.скорее всего последний вариант
         но пока просто тескт наверное)
      */
+
+    @Id
+    private Long id;
+    private String name;
+    private String gender;
+    private String description;
+    private String preference;
+
+
 }

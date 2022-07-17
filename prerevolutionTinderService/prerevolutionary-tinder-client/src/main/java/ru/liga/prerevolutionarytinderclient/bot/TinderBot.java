@@ -48,15 +48,15 @@ public class TinderBot extends SpringWebhookBot {
     }
 
     private BotApiMethod<?> handleUpdate(Update update){
-        if (update.hasCallbackQuery()) {
+/*        if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             return callbackQueryHandler.processCallbackQuery(callbackQuery);
-        } else {
+        } else {*/
             Message message = update.getMessage();
             if (message != null) {
                 return messageHandler.answerMessage(update.getMessage());
             }
-        }
+        //}
         return null;
     }
 
