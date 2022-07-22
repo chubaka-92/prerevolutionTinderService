@@ -4,6 +4,8 @@ public enum Buttons {
     LEFT_BUTTON("<--Лево"),
     RIGHT_BUTTON("Право-->"),
     MENU_BUTTON("Меню"),
+    MY_PROFILE("Моя анкета"),
+
     СHANGE_BUTTON("Изменить"),
 
     SIR("Сударь"),
