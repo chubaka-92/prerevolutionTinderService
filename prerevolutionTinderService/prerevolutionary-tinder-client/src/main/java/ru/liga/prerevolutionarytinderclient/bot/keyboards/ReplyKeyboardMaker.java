@@ -40,8 +40,10 @@ public class ReplyKeyboardMaker {
      */
     public ReplyKeyboardMarkup getProfileKeyboard() {
         KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton(Buttons.СHANGE_BUTTON.getButtonName()));
         row1.add(new KeyboardButton(Buttons.MENU_BUTTON.getButtonName()));
+        row1.add(new KeyboardButton(Buttons.MY_PROFILE.getButtonName()));
+        row1.add(new KeyboardButton(Buttons.СHANGE_BUTTON.getButtonName()));
+
 
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(row1);
@@ -74,6 +76,7 @@ public class ReplyKeyboardMaker {
 
         return replyKeyboardMarkup;
     }
+
 
     /*
      * Конопки выбора предпочтений
