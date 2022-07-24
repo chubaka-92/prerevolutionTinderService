@@ -6,5 +6,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class PersonResponse {
-    private String profile;
+    private PersonRequest personRequest;
+    private byte[] picture;
 }

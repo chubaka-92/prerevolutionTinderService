@@ -5,6 +5,8 @@ import lombok.*;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 @Entity
 @Builder
@@ -14,24 +16,17 @@ import javax.persistence.Table;
 @Setter
 @Table(name = "person")
 public class Person {
-    /*
-    тут наверное надо подумать над названием сущности...толи форма,толи профиль, толи юзер...или персона
-
-    что будим хранить...
-        айдишник, а какой? из телеги вроде как можно айдишкик чата получать..наверное можно его в качестве айди замутить
-        Имя
-        пол
-        кого ищет(тут енам...)
-        Описание...тут надо определиться чо сохранять будим) толи прям текст из тг, толи уже обработаную картинку закодированую.скорее всего последний вариант
-        но пока просто тескт наверное)
-     */
 
     @Id
     private Long id;
+
     private String name;
     private String gender;
     private String description;
     private String preference;
+
+    //думал хранить байткод картинки, и чтоб с ним бот работал. кароч при создании пишим в это поле) Пока не используется в боте
+    private byte[] picture;
 
 
 }

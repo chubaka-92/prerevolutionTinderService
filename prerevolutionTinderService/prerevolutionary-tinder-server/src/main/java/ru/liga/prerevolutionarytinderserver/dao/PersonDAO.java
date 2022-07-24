@@ -6,8 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.liga.prerevolutionarytinderserver.entity.Person;
 import ru.liga.prerevolutionarytinderserver.repositories.PersonRepository;
 
-import java.util.List;
-
 @Repository
 @RequiredArgsConstructor
 public class PersonDAO {

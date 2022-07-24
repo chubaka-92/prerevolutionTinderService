@@ -17,6 +17,7 @@ public class PersonRequest {
     private String gender;
     private String description;
     private String preference;
+    private byte[] picture;
 
     @Override
     public String toString() {
@@ -24,6 +25,7 @@ public class PersonRequest {
                 "\n Имя: " + name +
                 "\n Пол: " + gender +
                 "\n Описание: " + description +
-                "\n Кто интересен: " + preference;
+                "\n Кто интересен: " + preference +
+                "\n Код картинки: " + picture;
     }
 }

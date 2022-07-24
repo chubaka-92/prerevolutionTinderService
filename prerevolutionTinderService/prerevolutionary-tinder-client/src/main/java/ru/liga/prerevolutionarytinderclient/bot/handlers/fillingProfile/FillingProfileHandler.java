@@ -2,15 +2,20 @@ package ru.liga.prerevolutionarytinderclient.bot.handlers.fillingProfile;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.liga.prerevolutionarytinderclient.bot.TinderBot;
 import ru.liga.prerevolutionarytinderclient.bot.cache.DataCache;
 import ru.liga.prerevolutionarytinderclient.bot.cache.UserDataCache;
 import ru.liga.prerevolutionarytinderclient.bot.keyboards.ReplyKeyboardMaker;
 import ru.liga.prerevolutionarytinderclient.dto.PersonRequest;
 import ru.liga.prerevolutionarytinderclient.servicies.RequestServer;
 import ru.liga.prerevolutionarytinderclient.types.BotState;
+
+import java.io.*;
 
 @Slf4j
 @Component
@@ -74,7 +79,7 @@ public class FillingProfileHandler {
             SendMessage sendMessage = new SendMessage(chatId, requestServer.getProfile(userId).toString());
             sendMessage.enableMarkdown(true);
             sendMessage.setReplyMarkup(replyKeyboardMaker.getProfileKeyboard());
-            dataCache.setUsersCurrentBotState(userId, BotState.ASK_DESK);
+            dataCache.setUsersCurrentBotState(userId, BotState.SHOW_USER_PROFILE);
             return sendMessage;
         }
         return null;

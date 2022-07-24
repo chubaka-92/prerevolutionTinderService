@@ -1,16 +1,31 @@
 package ru.liga.prerevolutionarytinderclient.bot.handlers;
 
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.liga.prerevolutionarytinderclient.bot.TinderBot;
 import ru.liga.prerevolutionarytinderclient.bot.cache.DataCache;
 import ru.liga.prerevolutionarytinderclient.bot.handlers.fillingProfile.FillingProfileHandler;
 import ru.liga.prerevolutionarytinderclient.bot.keyboards.ReplyKeyboardMaker;
+import ru.liga.prerevolutionarytinderclient.dto.PersonRequest;
 import ru.liga.prerevolutionarytinderclient.servicies.RequestServer;
 import ru.liga.prerevolutionarytinderclient.types.BotState;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+@Slf4j
 @Component
 public class MessageHandler {
 
@@ -29,6 +44,11 @@ public class MessageHandler {
 
     @Autowired
     RequestServer requestServer;
+
+    @Autowired
+    @Lazy
+    TinderBot tinderBot;
+
 
     public BotApiMethod<?> answerMessage(Message message) {
         String inputText = message.getText();
@@ -64,7 +84,16 @@ public class MessageHandler {
         if (isFillingProfileState(botState)){
             replyMessage = fillingProfileHandler.processUsersInput(botState, message);
         } else if (botState.equals(BotState.SHOW_USER_PROFILE)) {
-            replyMessage = new SendMessage(chatId, requestServer.getProfile(userId).toString());
+            PersonRequest personRequest = requestServer.getProfile(userId);
+
+            replyMessage = new SendMessage(chatId, personRequest.toString());
+
+            //собираем фотку и пытаемся ее отправить..но чото..он ее не может кинуть
+            SendPhoto sendPhoto = new SendPhoto(chatId,requestServer.getProfileImage(userId));
+            sendPhoto.setCaption(personRequest.getGender() + ", " + personRequest.getName());
+            sendPhoto.setReplyMarkup(replyKeyboardMaker.getProfileKeyboard());
+            //tinderBot.getPhoto(sendPhoto); //тут отправка раскоментить если хош попытать удачу в отправке фотки. ошибка Error sending photo: [404] Not Found
+
         } else {
             replyMessage = new SendMessage(chatId, "Воспользуйтесь главным меню");
             replyMessage.setReplyMarkup(replyKeyboardMaker.getProfileKeyboard());

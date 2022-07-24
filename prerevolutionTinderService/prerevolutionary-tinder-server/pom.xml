@@ -64,6 +64,12 @@
             <artifactId>liquibase-core</artifactId>
             <version>4.11.0</version>
         </dependency>
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+            <version>2.4.8</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

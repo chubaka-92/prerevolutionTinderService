@@ -9,5 +9,4 @@ public class PrerevolutionaryTinderServerApplication {
     public static void main(String[] args) {
         SpringApplication.run(PrerevolutionaryTinderServerApplication.class, args);
     }
-
 }
