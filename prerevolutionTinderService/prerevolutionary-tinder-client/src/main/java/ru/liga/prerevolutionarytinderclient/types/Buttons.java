@@ -5,8 +5,10 @@ public enum Buttons {
     RIGHT_BUTTON("Право-->"),
     MENU_BUTTON("Меню"),
     MY_PROFILE("Моя анкета"),
+    SEARCH_BUTTON("Поиск"),
+    FAVORITE_BUTTON("Любимцы"),
 
-    СHANGE_BUTTON("Изменить"),
+    CHANGE_BUTTON("Изменить"),
 
     SIR("Сударь"),
     MADAM("Сударыня"),

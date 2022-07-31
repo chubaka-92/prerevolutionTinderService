@@ -1,40 +1,31 @@
 package ru.liga.prerevolutionarytinderclient.bot.handlers;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import ru.liga.prerevolutionarytinderclient.bot.TinderBot;
 import ru.liga.prerevolutionarytinderclient.bot.cache.DataCache;
+import ru.liga.prerevolutionarytinderclient.bot.handlers.favorits.FavoritesHandler;
 import ru.liga.prerevolutionarytinderclient.bot.handlers.fillingProfile.FillingProfileHandler;
 import ru.liga.prerevolutionarytinderclient.bot.keyboards.ReplyKeyboardMaker;
 import ru.liga.prerevolutionarytinderclient.dto.PersonRequest;
 import ru.liga.prerevolutionarytinderclient.servicies.RequestServer;
 import ru.liga.prerevolutionarytinderclient.types.BotState;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-
 @Slf4j
 @Component
 public class MessageHandler {
 
-/*  на случай если понадобится такой тип кнопок
-    @Autowired
-    InlineKeyboardMaker inlineKeyboardMaker;*/
 
     @Autowired
     FillingProfileHandler fillingProfileHandler;
+
+    @Autowired
+    FavoritesHandler favoritesHandler;
 
     @Autowired
     DataCache dataCache;
@@ -45,9 +36,9 @@ public class MessageHandler {
     @Autowired
     RequestServer requestServer;
 
-    @Autowired
+/*    @Autowired
     @Lazy
-    TinderBot tinderBot;
+    TinderBot tinderBot;*/
 
 
     public BotApiMethod<?> answerMessage(Message message) {
@@ -74,6 +65,9 @@ public class MessageHandler {
             case "Меню":
                 botState = BotState.SHOW_HELP_MENU;
                 break;
+            case "Любимцы":
+                botState = BotState.SHOW_FAVORITES;
+                break;
             default:
                 botState = dataCache.getUsersCurrentBotState(userId);
                 break;
@@ -81,7 +75,7 @@ public class MessageHandler {
 
         dataCache.setUsersCurrentBotState(userId, botState);
 
-        if (isFillingProfileState(botState)){
+        if (isFillingProfileState(botState)) {
             replyMessage = fillingProfileHandler.processUsersInput(botState, message);
         } else if (botState.equals(BotState.SHOW_USER_PROFILE)) {
             PersonRequest personRequest = requestServer.getProfile(userId);
@@ -89,14 +83,20 @@ public class MessageHandler {
             replyMessage = new SendMessage(chatId, personRequest.toString());
 
             //собираем фотку и пытаемся ее отправить..но чото..он ее не может кинуть
-            SendPhoto sendPhoto = new SendPhoto(chatId,requestServer.getProfileImage(userId));
+            // SendPhoto sendPhoto = new SendPhoto(chatId,requestServer.getProfileImage(userId));
+            InputFile inputFile = new InputFile().setMedia(requestServer.getProfileImage2(userId), "image.jpg");
+            SendPhoto sendPhoto = new SendPhoto(chatId, inputFile);
             sendPhoto.setCaption(personRequest.getGender() + ", " + personRequest.getName());
             sendPhoto.setReplyMarkup(replyKeyboardMaker.getProfileKeyboard());
             //tinderBot.getPhoto(sendPhoto); //тут отправка раскоментить если хош попытать удачу в отправке фотки. ошибка Error sending photo: [404] Not Found
 
+        } else if (isFavoritesState(botState)) {
+
+            replyMessage = favoritesHandler.processUsersInput(botState, message);
+
         } else {
             replyMessage = new SendMessage(chatId, "Воспользуйтесь главным меню");
-            replyMessage.setReplyMarkup(replyKeyboardMaker.getProfileKeyboard());
+            replyMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboard());
         }
 
         return replyMessage;
@@ -109,6 +109,17 @@ public class MessageHandler {
             case ASK_DESK:
             case ASK_PREFERENCE:
             case PROFILE_FILLED:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isFavoritesState(BotState currentState) {
+        switch (currentState) {
+            case SHOW_FAVORITES:
+            case SHOW_FAVORITES_NEXT:
+            case SHOW_FAVORITES_PREVIOUS:
                 return true;
             default:
                 return false;

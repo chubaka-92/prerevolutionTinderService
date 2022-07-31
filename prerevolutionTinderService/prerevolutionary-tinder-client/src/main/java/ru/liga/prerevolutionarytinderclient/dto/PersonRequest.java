@@ -18,10 +18,13 @@ public class PersonRequest {
     private String description;
     private String preference;
     private byte[] picture;
+    private int totalPage;
+    private int currentPage;
+
 
     @Override
     public String toString() {
-        return "Вот что ты навводил: " +
+        return "Анкета: " +
                 "\n Имя: " + name +
                 "\n Пол: " + gender +
                 "\n Описание: " + description +

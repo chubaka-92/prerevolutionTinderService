@@ -1,8 +1,11 @@
 package ru.liga.prerevolutionarytinderserver.services;
 
+import com.google.common.io.Files;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,9 +16,7 @@ import ru.liga.prerevolutionarytinderserver.api.PictureWebService;
 import ru.liga.prerevolutionarytinderserver.dao.PersonDAO;
 import ru.liga.prerevolutionarytinderserver.entity.Person;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 @Slf4j
 @Service
@@ -52,5 +53,35 @@ public class PersonServiceImp implements PersonService {
         InputStreamResource inputStreamResource =
                 new InputStreamResource(new ByteArrayInputStream(personDao.findPersonById(id).getPicture()));
         return new ResponseEntity(inputStreamResource, headers, HttpStatus.OK);
+    }
+
+
+    public Page<Person> getPersons(PageRequest pageRequest) {
+        log.info("Was calling getPersonById");
+        return personDao.findPersons(pageRequest);
+    }
+
+
+    //@saivanov : тут я чото опять мудрил с картинкой...херня не рабочая вроде
+    @Override
+    public File getImagePersonById2(Long id) {
+        log.info("Was calling getImagePersonById2. Input id: " + id);
+
+
+        Person person = personDao.findPersonById(id);
+        try {
+            InputStream initialStream = new FileInputStream(
+                    new File("src\\main\\resources\\wp4808160-amoled-cat-wallpapers.jpg"));
+            byte[] buffer = new byte[initialStream.available()];
+            initialStream.read(buffer);
+
+            File targetFile = new File("src\\main\\resources\\targetFile.tmp");
+            Files.write(buffer, targetFile);
+
+            return targetFile;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

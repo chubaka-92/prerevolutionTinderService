@@ -3,12 +3,16 @@ package ru.liga.prerevolutionarytinderclient.servicies;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import ru.liga.prerevolutionarytinderclient.dto.PersonPageResponse;
 import ru.liga.prerevolutionarytinderclient.dto.PersonRequest;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 @Slf4j
 @Service
@@ -35,5 +39,21 @@ public class RequestServer {
         byte[] imageBytes = restTemplate.getForEntity(url + "/" + id + "/image", byte[].class).getBody();
 
         return new InputFile().setMedia(new ByteArrayInputStream(imageBytes), "image.jpg");
+    }
+
+    public InputStream getProfileImage2(Long id) {
+
+        return restTemplate.getForEntity(url + "/" + id + "/image2", InputStream.class).getBody();
+    }
+
+    public PersonRequest getFavorites(Long id, int page) {
+        PersonPageResponse response = restTemplate.getForObject(url + "/pages/"+page, PersonPageResponse.class);
+        //Page<PersonRequest> personRequests = (Page<PersonRequest>) response.getBody();
+        //Page<PersonRequest> personRequests = response;
+
+        PersonRequest person = response.getContent().get(0);
+        person.setTotalPage(response.getTotalPages());
+
+        return person;
     }
 }

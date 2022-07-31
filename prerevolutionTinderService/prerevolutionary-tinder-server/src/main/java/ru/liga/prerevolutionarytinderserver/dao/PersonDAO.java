@@ -1,6 +1,8 @@
 package ru.liga.prerevolutionarytinderserver.dao;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.liga.prerevolutionarytinderserver.entity.Person;
@@ -18,5 +20,10 @@ public class PersonDAO {
     @Transactional
     public Person addPerson(Person person) {
         return personRepository.save(person);
+    }
+
+
+    public Page<Person> findPersons(PageRequest pageRequest) {
+        return personRepository.findAll(pageRequest);
     }
 }
