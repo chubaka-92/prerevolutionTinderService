@@ -15,6 +15,7 @@ import ru.liga.prerevolutionarytinderclient.types.BotState;
 @Slf4j
 @Component
 public class FavoritesHandler {
+    private static final int START_PAGE = 0;
     @Autowired
     ReplyKeyboardMaker replyKeyboardMaker;
 
@@ -34,36 +35,49 @@ public class FavoritesHandler {
 
         if (botState.equals(BotState.SHOW_FAVORITES)) {
             personRequest = requestServer.getProfile(userId);
-            int page = 0;
-            if(personRequest.getCurrentPage() >= 0 ){
-               page = personRequest.getCurrentPage();
-            }
-            PersonRequest favorite = requestServer.getFavorites(userId,page);
-            personRequest.setCurrentPage(1);
+
+            PersonRequest favorite = requestServer.getFavorites(userId, START_PAGE);
+            personRequest.setCurrentPage(favorite.getCurrentPage());
+            personRequest.setTotalPage(favorite.getTotalPage());
 
             SendMessage sendMessage = new SendMessage(chatId, favorite.toString());
             sendMessage.setReplyMarkup(replyKeyboardMaker.getSearchKeyboard());
-            dataCache.setUsersCurrentBotState(userId, BotState.SHOW_FAVORITES_NEXT);
             return sendMessage;
         }
 
         if (botState.equals(BotState.SHOW_FAVORITES_NEXT)) {
+            personRequest.setCurrentPage(getNextPage(personRequest.getTotalPage(), personRequest.getCurrentPage()));
+
             PersonRequest favorite = requestServer.getFavorites(userId,personRequest.getCurrentPage());
-            personRequest.setCurrentPage(personRequest.getCurrentPage()+1);
+
             SendMessage sendMessage = new SendMessage(chatId, favorite.toString());
             sendMessage.setReplyMarkup(replyKeyboardMaker.getSearchKeyboard());
-            dataCache.setUsersCurrentBotState(userId, BotState.SHOW_FAVORITES_NEXT);
             return sendMessage;
         }
 
         if (botState.equals(BotState.SHOW_FAVORITES_PREVIOUS)) {
+            personRequest.setCurrentPage(getPreviousPage(personRequest.getTotalPage(), personRequest.getCurrentPage()));
+
             PersonRequest favorite = requestServer.getFavorites(userId,personRequest.getCurrentPage());
-            personRequest.setCurrentPage(personRequest.getCurrentPage()-1);
+
             SendMessage sendMessage = new SendMessage(chatId, favorite.toString());
             sendMessage.setReplyMarkup(replyKeyboardMaker.getSearchKeyboard());
-            dataCache.setUsersCurrentBotState(userId, BotState.SHOW_FAVORITES_PREVIOUS);
             return sendMessage;
         }
         return null;
+    }
+
+    private int getNextPage(int totalPage, int currentPage) {
+        if(totalPage-1>currentPage){
+            return currentPage+1;
+        }
+        return START_PAGE;
+    }
+
+    private int getPreviousPage(int totalPage, int currentPage) {
+        if(currentPage>START_PAGE){
+            return currentPage-1;
+        }
+        return totalPage-1;
     }
 }

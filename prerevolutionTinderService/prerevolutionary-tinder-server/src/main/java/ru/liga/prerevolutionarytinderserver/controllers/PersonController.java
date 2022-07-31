@@ -44,14 +44,12 @@ public class PersonController {
         return personService.getImagePersonById2(Long.valueOf(id));
     }
 
-    @GetMapping("pages/{page}")
-    public ResponseEntity getPersons(@PathVariable("page") int page) {
+    @GetMapping("/{id}/pages/{page}")
+    public ResponseEntity getPersonsLikedByMe(@PathVariable("id") Long id, @PathVariable("page") int page) {
         log.info("Was calling getPersons.");
 
         PageRequest pageRequest = PageRequest.of(page, 1);
-        Page<Person> personPage = personService.getPersons(pageRequest);
-
-        System.out.println(personPage.getContent());
+        Page<Person> personPage = personService.getPersonsLikedByMe(id,pageRequest);
         return ResponseEntity.ok(personPage);
     }
 }

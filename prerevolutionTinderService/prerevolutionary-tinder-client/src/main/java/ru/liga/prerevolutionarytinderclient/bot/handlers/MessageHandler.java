@@ -68,6 +68,12 @@ public class MessageHandler {
             case "Любимцы":
                 botState = BotState.SHOW_FAVORITES;
                 break;
+            case "<--Лево":
+                botState = BotState.SHOW_FAVORITES_PREVIOUS;
+                break;
+            case "Право-->":
+                botState = BotState.SHOW_FAVORITES_NEXT;
+                break;
             default:
                 botState = dataCache.getUsersCurrentBotState(userId);
                 break;

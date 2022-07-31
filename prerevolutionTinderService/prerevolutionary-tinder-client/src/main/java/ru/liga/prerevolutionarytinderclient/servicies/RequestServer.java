@@ -47,12 +47,11 @@ public class RequestServer {
     }
 
     public PersonRequest getFavorites(Long id, int page) {
-        PersonPageResponse response = restTemplate.getForObject(url + "/pages/"+page, PersonPageResponse.class);
-        //Page<PersonRequest> personRequests = (Page<PersonRequest>) response.getBody();
-        //Page<PersonRequest> personRequests = response;
+        PersonPageResponse response = restTemplate.getForObject(url + "/"+id+"/pages/"+page, PersonPageResponse.class);
 
         PersonRequest person = response.getContent().get(0);
-        person.setTotalPage(response.getTotalPages());
+        person.setTotalPage((int) response.getTotalElements());
+        person.setCurrentPage(response.getNumber());
 
         return person;
     }

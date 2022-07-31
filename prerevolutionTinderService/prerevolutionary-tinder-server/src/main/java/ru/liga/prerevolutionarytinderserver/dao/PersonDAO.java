@@ -26,4 +26,8 @@ public class PersonDAO {
     public Page<Person> findPersons(PageRequest pageRequest) {
         return personRepository.findAll(pageRequest);
     }
+
+    public Page<Person> findLikedPersonsByMe(Long id,PageRequest pageRequest){
+        return personRepository.findLikedPersonsByMe(id,pageRequest);
+    }
 }

@@ -61,6 +61,11 @@ public class PersonServiceImp implements PersonService {
         return personDao.findPersons(pageRequest);
     }
 
+    public Page<Person> getPersonsLikedByMe(Long id, PageRequest pageRequest) {
+        log.info("Was calling getPersonsLikedByMe");
+        return personDao.findLikedPersonsByMe(id,pageRequest);
+    }
+
 
     //@saivanov : тут я чото опять мудрил с картинкой...херня не рабочая вроде
     @Override

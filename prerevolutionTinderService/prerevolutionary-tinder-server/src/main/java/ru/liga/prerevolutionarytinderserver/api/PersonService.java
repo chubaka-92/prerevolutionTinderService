@@ -18,5 +18,6 @@ public interface PersonService {
     File getImagePersonById2(Long id);
 
     Page<Person> getPersons(PageRequest pageRequest);
+    Page<Person> getPersonsLikedByMe(Long id, PageRequest pageRequest);
 
 }
