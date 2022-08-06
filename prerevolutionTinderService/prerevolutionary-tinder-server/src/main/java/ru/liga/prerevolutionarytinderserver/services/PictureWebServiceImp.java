@@ -37,4 +37,24 @@ public class PictureWebServiceImp implements PictureWebService {
             throw new RuntimeException(e);
         }
     }
+
+    public byte[] makePicture2(String text) {
+        log.info("Was calling makePicture. Input text: " + text);
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            JSONObject pictureJsonObject = new JSONObject();
+            pictureJsonObject.put("text", text);
+            HttpEntity<String> request = new HttpEntity<>(pictureJsonObject.toString(), headers);
+            byte[] picture =
+                    restTemplate.postForObject(createPersonUrl, request, byte[].class);
+            if (picture == null) {
+                throw new RuntimeException("Картинки нема");
+            }
+            return picture;
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -1,6 +1,5 @@
 package ru.liga.prerevolutionarytinderserver.services;
 
-import com.google.common.io.Files;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
@@ -14,9 +13,14 @@ import org.springframework.stereotype.Service;
 import ru.liga.prerevolutionarytinderserver.api.PersonService;
 import ru.liga.prerevolutionarytinderserver.api.PictureWebService;
 import ru.liga.prerevolutionarytinderserver.dao.PersonDAO;
+import ru.liga.prerevolutionarytinderserver.dto.PersonDto;
 import ru.liga.prerevolutionarytinderserver.entity.Person;
+import ru.liga.prerevolutionarytinderserver.type.Gender;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -31,6 +35,11 @@ public class PersonServiceImp implements PersonService {
     public ResponseEntity getPersonById(Long id) {
         log.info("Was calling getPersonById. Input id: " + id);
         return ResponseEntity.ok(personDao.findPersonById(id));
+    }
+
+    public ResponseEntity getPersonPicture(Long id) {
+        log.info("Was calling getPersonPicture. Input id: " + id);
+        return ResponseEntity.ok(pictureWebService.makePicture2(personDao.findPersonById(id).getDescription()));
     }
 
     public ResponseEntity addNewPerson(Person person) {
@@ -61,32 +70,75 @@ public class PersonServiceImp implements PersonService {
         return personDao.findPersons(pageRequest);
     }
 
-    public Page<Person> getPersonsLikedByMe(Long id, PageRequest pageRequest) {
+    public PersonDto getPersonsLikedByMe(Long id, PageRequest pageRequest) {
         log.info("Was calling getPersonsLikedByMe");
-        return personDao.findLikedPersonsByMe(id,pageRequest);
+        Page<Person> personPage = personDao.findMyLikeList(id, pageRequest);
+        Person person = personPage.getContent().get(0);
+        String status = getStatus(id, person.getId());
+        PersonDto personDto = PersonDto.builder()
+                .picture(getPicture(person.getDescription()))
+                .caption(person.getGender() + ", " + person.getName() + ", " + status)
+                .totalPage(personPage.getTotalPages())
+                .currentPage(personPage.getNumber())
+                .build();
+
+        return personDto;
     }
 
-
-    //@saivanov : тут я чото опять мудрил с картинкой...херня не рабочая вроде
     @Override
-    public File getImagePersonById2(Long id) {
-        log.info("Was calling getImagePersonById2. Input id: " + id);
+    public PersonDto getCandidateFavorites(Long id, PageRequest pageRequest) {
+        log.info("Was calling getPersonsLikedByMe");
 
+        Page<Person> personsPage = getCandidateFavorites(personDao.findPersonById(id), pageRequest);
 
-        Person person = personDao.findPersonById(id);
-        try {
-            InputStream initialStream = new FileInputStream(
-                    new File("src\\main\\resources\\wp4808160-amoled-cat-wallpapers.jpg"));
-            byte[] buffer = new byte[initialStream.available()];
-            initialStream.read(buffer);
+        Person personResult = personsPage.getContent().get(0);
+        PersonDto personDto = PersonDto.builder()
+                .picture(getPicture(personResult.getDescription()))
+                .caption(personResult.getGender() + ", " + personResult.getName())
+                .totalPage(personsPage.getTotalPages())
+                .currentPage(personsPage.getNumber())
+                .build();
+        return personDto;
+    }
 
-            File targetFile = new File("src\\main\\resources\\targetFile.tmp");
-            Files.write(buffer, targetFile);
-
-            return targetFile;
-        } catch (IOException e) {
-            e.printStackTrace();
+    private Page<Person> getCandidateFavorites(Person person, PageRequest pageRequest) {
+        if (Gender.GENTLEMEN.getTranslate().equals(person.getPreference())) {
+            return personDao.findCandidateFavoritesByMe(
+                    person.getId(),
+                    List.of(Gender.SIR.getTranslate()),
+                    Arrays.asList(person.getGender(), Gender.ALL.getTranslate()),
+                    pageRequest);
+        } else if (Gender.LADIES.getTranslate().equals(person.getPreference())) {
+            return personDao.findCandidateFavoritesByMe(
+                    person.getId(),
+                    List.of(Gender.MADAM.getTranslate()),
+                    Arrays.asList(person.getGender(), Gender.ALL.getTranslate()),
+                    pageRequest);
+        } else if (Gender.ALL.getTranslate().equals(person.getPreference())) {
+            return personDao.findCandidateFavoritesByMe(
+                    person.getId(),
+                    Arrays.asList(Gender.MADAM.getTranslate(), Gender.SIR.getTranslate()),
+                    Arrays.asList(person.getGender(), Gender.ALL.getTranslate()),
+                    pageRequest);
         }
         return null;
+    }
+
+    private String getStatus(Long personId, Long selectedPersonId) {
+
+        if (personDao.checkReciprocity(personId, selectedPersonId) == 2) {
+            return "Взаимность";
+        }
+        if (personDao.countLikedByMe(personId, selectedPersonId) == 1) {
+            return "Любим вами.";
+        }
+        if (personDao.countYouLikeMe(personId, selectedPersonId) == 1) {
+            return "Вы любимы.";
+        }
+        return null;
+    }
+
+    private byte[] getPicture(String description) {
+        return pictureWebService.makePicture2(description);
     }
 }

@@ -13,13 +13,13 @@ import java.util.List;
 public class InlineKeyboardMaker {
 
     /*
-    * Конопки выбора пола
-    * */
+     * Конопки выбора пола
+     * */
     public InlineKeyboardMarkup getGenderInlineMessageButtons() {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
-        rowList.add(getButton(Buttons.SIR.getButtonName(),Buttons.SIR.name()));
-        rowList.add(getButton(Buttons.MADAM.getButtonName(),Buttons.MADAM.name()));
+        rowList.add(getButton(Buttons.SIR.getButtonName(), Buttons.SIR.name()));
+        rowList.add(getButton(Buttons.MADAM.getButtonName(), Buttons.MADAM.name()));
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowList);
@@ -27,14 +27,14 @@ public class InlineKeyboardMaker {
     }
 
     /*
-    * Конопки выбора предпочтений
-    * */
+     * Конопки выбора предпочтений
+     * */
     public InlineKeyboardMarkup getSearchGenderInlineMessageButtons() {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
-        rowList.add(getButton(Buttons.GENTLEMEN.getButtonName(),Buttons.GENTLEMEN.name()));
-        rowList.add(getButton(Buttons.LADIES.getButtonName(),Buttons.LADIES.name()));
-        rowList.add(getButton(Buttons.ALL.getButtonName(),Buttons.ALL.name()));
+        rowList.add(getButton(Buttons.GENTLEMEN.getButtonName(), Buttons.GENTLEMEN.name()));
+        rowList.add(getButton(Buttons.LADIES.getButtonName(), Buttons.LADIES.name()));
+        rowList.add(getButton(Buttons.ALL.getButtonName(), Buttons.ALL.name()));
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowList);

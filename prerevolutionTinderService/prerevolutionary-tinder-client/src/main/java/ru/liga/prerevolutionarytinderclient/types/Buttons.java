@@ -8,6 +8,9 @@ public enum Buttons {
     SEARCH_BUTTON("Поиск"),
     FAVORITE_BUTTON("Любимцы"),
 
+    SEARCH_LEFT_BUTTON("<-Лево"),
+    SEARCH_RIGHT_BUTTON("Право->"),
+
     CHANGE_BUTTON("Изменить"),
 
     SIR("Сударь"),

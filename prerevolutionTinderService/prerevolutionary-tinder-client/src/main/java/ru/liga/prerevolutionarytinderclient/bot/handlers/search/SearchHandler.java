@@ -1,6 +1,5 @@
-package ru.liga.prerevolutionarytinderclient.bot.handlers.favorits;
+package ru.liga.prerevolutionarytinderclient.bot.handlers.search;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -18,11 +17,8 @@ import ru.liga.prerevolutionarytinderclient.types.BotState;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-
-
-@Slf4j
 @Component
-public class FavoritesHandler {
+public class SearchHandler {
     private static final int START_PAGE = 0;
     @Autowired
     ReplyKeyboardMaker replyKeyboardMaker;
@@ -45,11 +41,11 @@ public class FavoritesHandler {
         String chatId = message.getChatId().toString();
         String inputText = message.getText();
 
-        if (botState.equals(BotState.SHOW_FAVORITES)) {
+        if (botState.equals(BotState.SEARCH_FAVORITES)) {
+
             personRequest = requestServer.getProfile(userId);
 
-            //PersonRequest favorite = requestServer.getFavorites(userId, START_PAGE);
-            PersonsResponse favorite = requestServer.getFavorites(userId, START_PAGE);
+            PersonsResponse favorite = requestServer.getCandidateFavorites(userId, 0);
             personRequest.setCurrentPage(favorite.getCurrentPage());
             personRequest.setTotalPage(favorite.getTotalPage());
 
@@ -62,10 +58,10 @@ public class FavoritesHandler {
             return sendMessage;
         }
 
-        if (botState.equals(BotState.SHOW_FAVORITES_NEXT)) {
+        if (botState.equals(BotState.SEARCH_LIKE)) {
             personRequest.setCurrentPage(getNextPage(personRequest.getTotalPage(), personRequest.getCurrentPage()));
 
-            PersonsResponse favorite = requestServer.getFavorites(userId,personRequest.getCurrentPage());
+            PersonsResponse favorite = requestServer.getCandidateFavorites(userId,personRequest.getCurrentPage());
             personRequest.setCurrentPage(favorite.getCurrentPage());
             personRequest.setTotalPage(favorite.getTotalPage());
 
@@ -77,10 +73,10 @@ public class FavoritesHandler {
             return sendMessage;
         }
 
-        if (botState.equals(BotState.SHOW_FAVORITES_PREVIOUS)) {
+        if (botState.equals(BotState.SEARCH_DONT_LIKE)) {
             personRequest.setCurrentPage(getPreviousPage(personRequest.getTotalPage(), personRequest.getCurrentPage()));
 
-            PersonsResponse favorite = requestServer.getFavorites(userId,personRequest.getCurrentPage());
+            PersonsResponse favorite = requestServer.getCandidateFavorites(userId,personRequest.getCurrentPage());
             personRequest.setCurrentPage(favorite.getCurrentPage());
             personRequest.setTotalPage(favorite.getTotalPage());
 
@@ -94,13 +90,14 @@ public class FavoritesHandler {
         return null;
     }
 
+
     private SendPhoto getSendPhoto(Long userId, PersonsResponse favorite) {
         InputStream inputStream = new ByteArrayInputStream(favorite.getPicture());
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setPhoto(new InputFile(inputStream, "picture.jpg"));
         sendPhoto.setChatId(String.valueOf(userId));
         sendPhoto.setCaption(favorite.getCaption());
-        sendPhoto.setReplyMarkup(replyKeyboardMaker.getFavoriteKeyboard());
+        sendPhoto.setReplyMarkup(replyKeyboardMaker.getSearchKeyboard());
         return sendPhoto;
     }
 

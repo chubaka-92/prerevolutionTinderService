@@ -2,44 +2,46 @@ package ru.liga.prerevolutionarytinderclient.bot.handlers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.liga.prerevolutionarytinderclient.bot.TinderBot;
 import ru.liga.prerevolutionarytinderclient.bot.cache.DataCache;
 import ru.liga.prerevolutionarytinderclient.bot.handlers.favorits.FavoritesHandler;
 import ru.liga.prerevolutionarytinderclient.bot.handlers.fillingProfile.FillingProfileHandler;
+import ru.liga.prerevolutionarytinderclient.bot.handlers.search.SearchHandler;
 import ru.liga.prerevolutionarytinderclient.bot.keyboards.ReplyKeyboardMaker;
 import ru.liga.prerevolutionarytinderclient.dto.PersonRequest;
 import ru.liga.prerevolutionarytinderclient.servicies.RequestServer;
 import ru.liga.prerevolutionarytinderclient.types.BotState;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 @Slf4j
 @Component
 public class MessageHandler {
-
-
     @Autowired
     FillingProfileHandler fillingProfileHandler;
-
     @Autowired
     FavoritesHandler favoritesHandler;
-
+    @Autowired
+    SearchHandler searchHandler;
     @Autowired
     DataCache dataCache;
-
     @Autowired
     ReplyKeyboardMaker replyKeyboardMaker;
 
     @Autowired
     RequestServer requestServer;
 
-/*    @Autowired
+    @Autowired
     @Lazy
-    TinderBot tinderBot;*/
-
+    TinderBot tinderBot;
 
     public BotApiMethod<?> answerMessage(Message message) {
         String inputText = message.getText();
@@ -74,6 +76,15 @@ public class MessageHandler {
             case "Право-->":
                 botState = BotState.SHOW_FAVORITES_NEXT;
                 break;
+            case "Поиск":
+                botState = BotState.SEARCH_FAVORITES;
+                break;
+            case "<-Лево":
+                botState = BotState.SEARCH_DONT_LIKE;
+                break;
+            case "Право->":
+                botState = BotState.SEARCH_LIKE;
+                break;
             default:
                 botState = dataCache.getUsersCurrentBotState(userId);
                 break;
@@ -88,17 +99,20 @@ public class MessageHandler {
 
             replyMessage = new SendMessage(chatId, personRequest.toString());
 
-            //собираем фотку и пытаемся ее отправить..но чото..он ее не может кинуть
-            // SendPhoto sendPhoto = new SendPhoto(chatId,requestServer.getProfileImage(userId));
-            InputFile inputFile = new InputFile().setMedia(requestServer.getProfileImage2(userId), "image.jpg");
-            SendPhoto sendPhoto = new SendPhoto(chatId, inputFile);
+            InputStream inputStream = new ByteArrayInputStream(personRequest.getPicture());
+            SendPhoto sendPhoto = new SendPhoto();
+            sendPhoto.setPhoto(new InputFile(inputStream, "picture.jpg"));
+            sendPhoto.setChatId(String.valueOf(userId));
             sendPhoto.setCaption(personRequest.getGender() + ", " + personRequest.getName());
-            sendPhoto.setReplyMarkup(replyKeyboardMaker.getProfileKeyboard());
-            //tinderBot.getPhoto(sendPhoto); //тут отправка раскоментить если хош попытать удачу в отправке фотки. ошибка Error sending photo: [404] Not Found
 
+            tinderBot.getPhoto(sendPhoto);
         } else if (isFavoritesState(botState)) {
 
             replyMessage = favoritesHandler.processUsersInput(botState, message);
+
+        } else if (isSearchState(botState)) {
+
+            replyMessage = searchHandler.processUsersInput(botState, message);
 
         } else {
             replyMessage = new SendMessage(chatId, "Воспользуйтесь главным меню");
@@ -126,6 +140,17 @@ public class MessageHandler {
             case SHOW_FAVORITES:
             case SHOW_FAVORITES_NEXT:
             case SHOW_FAVORITES_PREVIOUS:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isSearchState(BotState currentState) {
+        switch (currentState) {
+            case SEARCH_FAVORITES:
+            case SEARCH_DONT_LIKE:
+            case SEARCH_LIKE:
                 return true;
             default:
                 return false;

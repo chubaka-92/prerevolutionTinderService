@@ -1,14 +1,18 @@
 package ru.liga.prerevolutionarytinderclient.bot.cache;
 
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.stereotype.Component;
 import ru.liga.prerevolutionarytinderclient.types.BotState;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Data
+@Builder
 @Component
 public class UserDataCache implements DataCache {
-    private Map<Long, BotState> usersBotStates = new HashMap<>();
+    private Map<Long, BotState> usersBotStates;
 
     @Override
     public void setUsersCurrentBotState(Long userId, BotState botState) {

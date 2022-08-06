@@ -13,13 +13,34 @@ import java.util.List;
 public class ReplyKeyboardMaker {
 
     /*
-    Кнопки при поиске
+    Кнопки в Любимцах
      */
-    public ReplyKeyboardMarkup getSearchKeyboard() {
+    public ReplyKeyboardMarkup getFavoriteKeyboard() {
         KeyboardRow row1 = new KeyboardRow();
         row1.add(new KeyboardButton(Buttons.LEFT_BUTTON.getButtonName()));
         row1.add(new KeyboardButton(Buttons.MENU_BUTTON.getButtonName()));
         row1.add(new KeyboardButton(Buttons.RIGHT_BUTTON.getButtonName()));
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        keyboard.add(row1);
+
+        final ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setKeyboard(keyboard);
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
+
+        return replyKeyboardMarkup;
+    }
+
+    /*
+Кнопки при поиске
+ */
+    public ReplyKeyboardMarkup getSearchKeyboard() {
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(new KeyboardButton(Buttons.SEARCH_LEFT_BUTTON.getButtonName()));
+        row1.add(new KeyboardButton(Buttons.MENU_BUTTON.getButtonName()));
+        row1.add(new KeyboardButton(Buttons.SEARCH_RIGHT_BUTTON.getButtonName()));
 
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(row1);
