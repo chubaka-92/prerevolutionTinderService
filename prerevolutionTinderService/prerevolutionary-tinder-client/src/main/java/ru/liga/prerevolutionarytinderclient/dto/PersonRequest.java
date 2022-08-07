@@ -17,9 +17,9 @@ public class PersonRequest {
     private String gender;
     private String description;
     private String preference;
-    private byte[] picture;
     private int totalPage;
     private int currentPage;
+    private Long currentPersonId;
 
 
     @Override
@@ -28,7 +28,6 @@ public class PersonRequest {
                 "\n Имя: " + name +
                 "\n Пол: " + gender +
                 "\n Описание: " + description +
-                "\n Кто интересен: " + preference +
-                "\n Код картинки: " + picture;
+                "\n Кто интересен: " + preference;
     }
 }

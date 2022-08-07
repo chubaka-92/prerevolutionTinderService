@@ -3,6 +3,7 @@ package ru.liga.prerevolutionarytinderserver.repositories;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.liga.prerevolutionarytinderserver.entity.Person;
@@ -21,6 +22,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
             "from person p\n" +
             "where p.preference in :preferences\n" +
             "  and p.gender in :genders\n" +
+            "  and p.id <> :id\n" +
             "  and p.id not in (select pi.selected_person_id\n" +
             "                    from person_intersect  pi\n" +
             "                    where (person_id = :id)\n" +
@@ -28,6 +30,9 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
             "                        and pi.reciprocity=true)\n" +
             ")";
 
+    String updateReciprocity = "update  person_intersect\n" +
+            "set reciprocity='true'\n" +
+            "where (person_id = ?1 and selected_person_id = ?2) or (person_id = ?2 and selected_person_id = ?1)";
 
     @Query(value = selectMyLikeList, nativeQuery = true)
     Page<Person> findMyLikeList(Long id, PageRequest pageRequest);
@@ -48,4 +53,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
             @Param("preferences") Collection preferences,
             PageRequest pageRequest);
 
+    @Modifying
+    @Query(value = updateReciprocity, nativeQuery = true)
+    void updateReciprocity(Long id, Long currentPersonId);
 }

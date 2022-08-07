@@ -12,7 +12,7 @@ import ru.liga.prerevolutionarytinderclient.bot.TinderBot;
 import ru.liga.prerevolutionarytinderclient.bot.cache.DataCache;
 import ru.liga.prerevolutionarytinderclient.bot.keyboards.ReplyKeyboardMaker;
 import ru.liga.prerevolutionarytinderclient.dto.PersonRequest;
-import ru.liga.prerevolutionarytinderclient.dto.PersonsResponse;
+import ru.liga.prerevolutionarytinderclient.dto.PersonResponse;
 import ru.liga.prerevolutionarytinderclient.servicies.RequestServer;
 import ru.liga.prerevolutionarytinderclient.types.BotState;
 
@@ -49,7 +49,7 @@ public class FavoritesHandler {
             personRequest = requestServer.getProfile(userId);
 
             //PersonRequest favorite = requestServer.getFavorites(userId, START_PAGE);
-            PersonsResponse favorite = requestServer.getFavorites(userId, START_PAGE);
+            PersonResponse favorite = requestServer.getFavorites(userId, START_PAGE);
             personRequest.setCurrentPage(favorite.getCurrentPage());
             personRequest.setTotalPage(favorite.getTotalPage());
 
@@ -65,7 +65,7 @@ public class FavoritesHandler {
         if (botState.equals(BotState.SHOW_FAVORITES_NEXT)) {
             personRequest.setCurrentPage(getNextPage(personRequest.getTotalPage(), personRequest.getCurrentPage()));
 
-            PersonsResponse favorite = requestServer.getFavorites(userId,personRequest.getCurrentPage());
+            PersonResponse favorite = requestServer.getFavorites(userId,personRequest.getCurrentPage());
             personRequest.setCurrentPage(favorite.getCurrentPage());
             personRequest.setTotalPage(favorite.getTotalPage());
 
@@ -80,7 +80,7 @@ public class FavoritesHandler {
         if (botState.equals(BotState.SHOW_FAVORITES_PREVIOUS)) {
             personRequest.setCurrentPage(getPreviousPage(personRequest.getTotalPage(), personRequest.getCurrentPage()));
 
-            PersonsResponse favorite = requestServer.getFavorites(userId,personRequest.getCurrentPage());
+            PersonResponse favorite = requestServer.getFavorites(userId,personRequest.getCurrentPage());
             personRequest.setCurrentPage(favorite.getCurrentPage());
             personRequest.setTotalPage(favorite.getTotalPage());
 
@@ -94,7 +94,7 @@ public class FavoritesHandler {
         return null;
     }
 
-    private SendPhoto getSendPhoto(Long userId, PersonsResponse favorite) {
+    private SendPhoto getSendPhoto(Long userId, PersonResponse favorite) {
         InputStream inputStream = new ByteArrayInputStream(favorite.getPicture());
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setPhoto(new InputFile(inputStream, "picture.jpg"));

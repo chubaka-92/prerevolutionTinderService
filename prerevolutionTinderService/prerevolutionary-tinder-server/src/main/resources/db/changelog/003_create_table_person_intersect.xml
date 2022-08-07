@@ -12,6 +12,7 @@
             </column>
             <column name="person_id" type="BIGINT"/>
             <column name="selected_person_id" type="BIGINT"/>
+            <column name="reciprocity" type="boolean" defaultValue="false"/>
         </createTable>
     </changeSet>
 

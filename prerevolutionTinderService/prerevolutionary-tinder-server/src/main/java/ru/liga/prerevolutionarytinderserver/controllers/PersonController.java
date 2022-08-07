@@ -23,16 +23,16 @@ public class PersonController {
         return personService.getPersonById(id);
     }
 
-    @GetMapping("/{id}/image")
-    public ResponseEntity<?> getPersonImage(@PathVariable("id") Long id) {
-        log.info("Was calling getPersonImage. Input id: " + id);
-        return personService.getImagePersonById(id);
+    @GetMapping("/form/{id}")
+    public ResponseEntity<PersonDto> getPersonForm(@PathVariable("id") Long id) {
+        log.info("Was calling getPersonForm. Input id: " + id);
+        return ResponseEntity.ok(personService.getPersonFormById(id));
     }
 
     @PostMapping()
-    public ResponseEntity<?> createPerson(@RequestBody Person person) {
+    public ResponseEntity<Person> createPerson(@RequestBody Person person) {
         log.info("Was calling createPerson. Input person: " + person);
-        return personService.addNewPerson(person);
+        return ResponseEntity.ok(personService.addNewPerson(person));
     }
 
     @GetMapping("/favorites/{id}/pages/{page}")
@@ -44,12 +44,18 @@ public class PersonController {
         return ResponseEntity.ok(personService.getPersonsLikedByMe(id, pageRequest));
     }
 
-    @GetMapping("/search/{id}/pages/{page}")
+    @GetMapping("/{id}/search/pages/{page}")
     public ResponseEntity<PersonDto> getCandidateFavorites(@PathVariable("id") Long id, @PathVariable("page") int page) {
         log.info("Was calling getPersons.");
 
         PageRequest pageRequest = PageRequest.of(page, 1);
 
         return ResponseEntity.ok(personService.getCandidateFavorites(id, pageRequest));
+    }
+
+    @PostMapping("/{id}/search/")
+    public ResponseEntity<String> createLikeFavorites(@PathVariable("id") Long id,@RequestBody Long currentPersonId) {
+        log.info("Was calling createLikeFavorites. Input userId: {} currentPersonId: {}",id,currentPersonId);
+        return ResponseEntity.ok(personService.addLikeFavorites(id,currentPersonId));
     }
 }

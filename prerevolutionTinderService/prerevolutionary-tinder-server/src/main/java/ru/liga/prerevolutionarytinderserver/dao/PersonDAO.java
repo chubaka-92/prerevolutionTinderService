@@ -47,4 +47,9 @@ public class PersonDAO {
     public Page<Person> findCandidateFavoritesByMe(Long id, Collection genders,Collection preferences, PageRequest pageRequest) {
         return personRepository.findCandidateFavoritesByMe(id,genders,preferences, pageRequest);
     }
+
+    @Transactional
+    public void updateReciprocity(Long id, Long currentPersonId) {
+        personRepository.updateReciprocity(id,currentPersonId);
+    }
 }

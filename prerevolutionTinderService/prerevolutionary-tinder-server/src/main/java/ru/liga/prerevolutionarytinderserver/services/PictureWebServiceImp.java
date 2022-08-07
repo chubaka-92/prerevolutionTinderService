@@ -18,27 +18,7 @@ public class PictureWebServiceImp implements PictureWebService {
 
     private final String createPersonUrl = "https://pict-serv-2-0-fixey-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com/pict";
 
-    public InputStream makePicture(String text) {
-        log.info("Was calling makePicture. Input text: " + text);
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            JSONObject pictureJsonObject = new JSONObject();
-            pictureJsonObject.put("text", text);
-            HttpEntity<String> request = new HttpEntity<>(pictureJsonObject.toString(), headers);
-            byte[] picture =
-                    restTemplate.postForObject(createPersonUrl, request, byte[].class);
-            if (picture == null) {
-                throw new RuntimeException("Картинки нема");
-            }
-            return new ByteArrayInputStream(picture);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public byte[] makePicture2(String text) {
+    public byte[] makePicture(String text) {
         log.info("Was calling makePicture. Input text: " + text);
         try {
             RestTemplate restTemplate = new RestTemplate();

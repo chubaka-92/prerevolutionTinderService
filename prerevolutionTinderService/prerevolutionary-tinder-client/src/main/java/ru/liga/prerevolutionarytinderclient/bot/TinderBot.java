@@ -77,6 +77,20 @@ public class TinderBot extends SpringWebhookBot {
             throw new RuntimeException("Ошибка: невозможно отправить файл.");
         }
     }
+    /**
+     * Метод реализует отправление сообщеня по запросу.
+     *
+     * @param sendMessage сообщение любого типа.
+     */
+    public void getMessage(SendMessage sendMessage) {
+        log.info("Was calling getPhoto.");
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка: невозможно отправить сообщение." + e);
+            throw new RuntimeException("Ошибка: невозможно отправить сообщение.");
+        }
+    }
 
     @Override
     public String getBotUsername() {

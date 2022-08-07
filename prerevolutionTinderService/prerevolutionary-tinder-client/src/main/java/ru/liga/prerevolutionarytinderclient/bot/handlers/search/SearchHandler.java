@@ -11,15 +11,18 @@ import ru.liga.prerevolutionarytinderclient.bot.TinderBot;
 import ru.liga.prerevolutionarytinderclient.bot.cache.DataCache;
 import ru.liga.prerevolutionarytinderclient.bot.keyboards.ReplyKeyboardMaker;
 import ru.liga.prerevolutionarytinderclient.dto.PersonRequest;
-import ru.liga.prerevolutionarytinderclient.dto.PersonsResponse;
+import ru.liga.prerevolutionarytinderclient.dto.PersonResponse;
 import ru.liga.prerevolutionarytinderclient.servicies.RequestServer;
 import ru.liga.prerevolutionarytinderclient.types.BotState;
+import ru.liga.prerevolutionarytinderclient.types.FavoriteStatus;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 @Component
 public class SearchHandler {
     private static final int START_PAGE = 0;
+    private static final int ONE_POSITION = 1;
+    private static final int TWO_POSITION = 2;
     @Autowired
     ReplyKeyboardMaker replyKeyboardMaker;
 
@@ -39,59 +42,72 @@ public class SearchHandler {
     public SendMessage processUsersInput(BotState botState, Message message) {
         long userId = message.getFrom().getId();
         String chatId = message.getChatId().toString();
-        String inputText = message.getText();
 
         if (botState.equals(BotState.SEARCH_FAVORITES)) {
-
             personRequest = requestServer.getProfile(userId);
 
-            PersonsResponse favorite = requestServer.getCandidateFavorites(userId, 0);
-            personRequest.setCurrentPage(favorite.getCurrentPage());
-            personRequest.setTotalPage(favorite.getTotalPage());
+            PersonResponse favorite = requestServer.getCandidateFavorites(userId, START_PAGE);
+
+            reLoadPersonRequest(favorite);
 
             SendPhoto sendPhoto = getSendPhoto(userId, favorite);
-
             tinderBot.getPhoto(sendPhoto);
-
-            SendMessage sendMessage = new SendMessage(chatId,favorite.toString());
-            //sendMessage.setReplyMarkup(replyKeyboardMaker.getSearchKeyboard());
-            return sendMessage;
+            return null;
         }
 
         if (botState.equals(BotState.SEARCH_LIKE)) {
-            personRequest.setCurrentPage(getNextPage(personRequest.getTotalPage(), personRequest.getCurrentPage()));
 
-            PersonsResponse favorite = requestServer.getCandidateFavorites(userId,personRequest.getCurrentPage());
-            personRequest.setCurrentPage(favorite.getCurrentPage());
-            personRequest.setTotalPage(favorite.getTotalPage());
+            //Сделайть сейв на серваке и ждем в ответ статус(Взаимно) и отправляем его в чат
+            String statusFavorite  =  requestServer.saveLikeFavorites(userId, personRequest.getCurrentPersonId());
+            if(FavoriteStatus.RECIPROCITY.getTranslate().equals(statusFavorite)){
+                SendMessage sendMessage = new SendMessage(chatId,statusFavorite);
+                //Кидаем сообщение если Взаимная лаф
+                tinderBot.getMessage(sendMessage);
+            }
 
+            //получаем следующуую анкету...
+            PersonResponse favorite = getNextPageAfterLike(userId);
+            reLoadPersonRequest(favorite);
+            //создаем и шлем фотку
             SendPhoto sendPhoto = getSendPhoto(userId, favorite);
-
             tinderBot.getPhoto(sendPhoto);
-            SendMessage sendMessage = new SendMessage(chatId, favorite.toString());
-            //sendMessage.setReplyMarkup(replyKeyboardMaker.getSearchKeyboard());
-            return sendMessage;
+
+            return null;
         }
 
         if (botState.equals(BotState.SEARCH_DONT_LIKE)) {
-            personRequest.setCurrentPage(getPreviousPage(personRequest.getTotalPage(), personRequest.getCurrentPage()));
+            personRequest.setCurrentPage(getNextPage(personRequest.getTotalPage(), personRequest.getCurrentPage()));
 
-            PersonsResponse favorite = requestServer.getCandidateFavorites(userId,personRequest.getCurrentPage());
-            personRequest.setCurrentPage(favorite.getCurrentPage());
-            personRequest.setTotalPage(favorite.getTotalPage());
+            PersonResponse favorite = requestServer.getCandidateFavorites(userId,personRequest.getCurrentPage());
+
+            reLoadPersonRequest(favorite);
 
             SendPhoto sendPhoto = getSendPhoto(userId, favorite);
 
             tinderBot.getPhoto(sendPhoto);
-            SendMessage sendMessage = new SendMessage(chatId, favorite.toString());
-            //sendMessage.setReplyMarkup(replyKeyboardMaker.getSearchKeyboard());
-            return sendMessage;
+            return null;
         }
         return null;
     }
 
+    private PersonResponse getNextPageAfterLike(Long userId) {
+        if(personRequest.getTotalPage()-TWO_POSITION> personRequest.getCurrentPage()){ // проверяем будет ли запись с номером текущей записи в списке.
+            return requestServer.getCandidateFavorites(userId,personRequest.getCurrentPage());
+        } else if (personRequest.getTotalPage()-ONE_POSITION > 0){ // проверяем есть ли хоть какие то записи. е
+            return requestServer.getCandidateFavorites(userId,START_PAGE);
+        }else {
+            throw new RuntimeException("Кончились кандидаты(");
+        }
+    }
 
-    private SendPhoto getSendPhoto(Long userId, PersonsResponse favorite) {
+    private void reLoadPersonRequest(PersonResponse favorite) {
+        personRequest.setCurrentPage(favorite.getCurrentPage());
+        personRequest.setTotalPage(favorite.getTotalPage());
+        personRequest.setCurrentPersonId(favorite.getId());
+    }
+
+
+    private SendPhoto getSendPhoto(Long userId, PersonResponse favorite) {
         InputStream inputStream = new ByteArrayInputStream(favorite.getPicture());
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setPhoto(new InputFile(inputStream, "picture.jpg"));
@@ -102,16 +118,10 @@ public class SearchHandler {
     }
 
     private int getNextPage(int totalPage, int currentPage) {
-        if(totalPage-1>currentPage){
-            return currentPage+1;
+        if(totalPage-ONE_POSITION>currentPage){
+            return currentPage+ONE_POSITION;
         }
         return START_PAGE;
     }
 
-    private int getPreviousPage(int totalPage, int currentPage) {
-        if(currentPage>START_PAGE){
-            return currentPage-1;
-        }
-        return totalPage-1;
-    }
 }

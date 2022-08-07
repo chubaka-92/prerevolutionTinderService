@@ -11,9 +11,9 @@ public interface PersonService {
 
     ResponseEntity getPersonPicture(Long id);
 
-    ResponseEntity addNewPerson(Person person);
+    Person addNewPerson(Person person);
 
-    ResponseEntity getImagePersonById(Long id);
+    PersonDto getPersonFormById(Long id);
 
     Page<Person> getPersons(PageRequest pageRequest);
 
@@ -21,4 +21,5 @@ public interface PersonService {
 
     PersonDto getCandidateFavorites(Long id, PageRequest pageRequest);
 
+    String addLikeFavorites(Long id, Long currentPersonId);
 }

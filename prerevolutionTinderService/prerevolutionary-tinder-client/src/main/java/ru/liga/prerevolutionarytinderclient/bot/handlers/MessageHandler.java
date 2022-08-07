@@ -15,7 +15,7 @@ import ru.liga.prerevolutionarytinderclient.bot.handlers.favorits.FavoritesHandl
 import ru.liga.prerevolutionarytinderclient.bot.handlers.fillingProfile.FillingProfileHandler;
 import ru.liga.prerevolutionarytinderclient.bot.handlers.search.SearchHandler;
 import ru.liga.prerevolutionarytinderclient.bot.keyboards.ReplyKeyboardMaker;
-import ru.liga.prerevolutionarytinderclient.dto.PersonRequest;
+import ru.liga.prerevolutionarytinderclient.dto.PersonResponse;
 import ru.liga.prerevolutionarytinderclient.servicies.RequestServer;
 import ru.liga.prerevolutionarytinderclient.types.BotState;
 
@@ -47,10 +47,6 @@ public class MessageHandler {
         String inputText = message.getText();
         String chatId = message.getChatId().toString();
         Long userId = message.getFrom().getId();
-
-//        if (personRequest.getId()==null){
-//            personRequest.setId(userId);
-//        }
 
         BotState botState;
         SendMessage replyMessage = null;
@@ -93,19 +89,16 @@ public class MessageHandler {
         dataCache.setUsersCurrentBotState(userId, botState);
 
         if (isFillingProfileState(botState)) {
+
             replyMessage = fillingProfileHandler.processUsersInput(botState, message);
+
         } else if (botState.equals(BotState.SHOW_USER_PROFILE)) {
-            PersonRequest personRequest = requestServer.getProfile(userId);
 
-            replyMessage = new SendMessage(chatId, personRequest.toString());
+            PersonResponse personRequest = requestServer.getMyProfileForm(userId);
 
-            InputStream inputStream = new ByteArrayInputStream(personRequest.getPicture());
-            SendPhoto sendPhoto = new SendPhoto();
-            sendPhoto.setPhoto(new InputFile(inputStream, "picture.jpg"));
-            sendPhoto.setChatId(String.valueOf(userId));
-            sendPhoto.setCaption(personRequest.getGender() + ", " + personRequest.getName());
-
+            SendPhoto sendPhoto = getSendPhoto(userId, personRequest);
             tinderBot.getPhoto(sendPhoto);
+
         } else if (isFavoritesState(botState)) {
 
             replyMessage = favoritesHandler.processUsersInput(botState, message);
@@ -120,6 +113,15 @@ public class MessageHandler {
         }
 
         return replyMessage;
+    }
+
+    private SendPhoto getSendPhoto(Long userId, PersonResponse personRequest) {
+        InputStream inputStream = new ByteArrayInputStream(personRequest.getPicture());
+        SendPhoto sendPhoto = new SendPhoto();
+        sendPhoto.setPhoto(new InputFile(inputStream, "picture.jpg"));
+        sendPhoto.setChatId(String.valueOf(userId));
+        sendPhoto.setCaption(personRequest.getCaption());
+        return sendPhoto;
     }
 
     private boolean isFillingProfileState(BotState currentState) {

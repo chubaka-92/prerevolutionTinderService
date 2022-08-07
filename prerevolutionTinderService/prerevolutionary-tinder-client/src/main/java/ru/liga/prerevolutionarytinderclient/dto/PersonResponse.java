@@ -9,7 +9,8 @@ import org.springframework.stereotype.Component;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PersonsResponse {
+public class PersonResponse {
+    private Long id;
     private String caption;
     private byte[] picture;
     private int totalPage;

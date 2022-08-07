@@ -8,6 +8,7 @@ import lombok.Setter;
 @Getter
 @Builder
 public class PersonDto {
+    private Long id;
     private String caption;
     private byte[] picture;
     private int totalPage;
