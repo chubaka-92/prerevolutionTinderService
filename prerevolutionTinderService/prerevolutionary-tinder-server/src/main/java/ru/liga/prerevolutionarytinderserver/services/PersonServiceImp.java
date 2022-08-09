@@ -2,24 +2,19 @@ package ru.liga.prerevolutionarytinderserver.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.liga.prerevolutionarytinderserver.api.PersonMapper;
 import ru.liga.prerevolutionarytinderserver.api.PersonService;
-import ru.liga.prerevolutionarytinderserver.api.PictureWebService;
-import ru.liga.prerevolutionarytinderserver.dao.PersonDAO;
-import ru.liga.prerevolutionarytinderserver.dao.RelationshipsDAO;
+import ru.liga.prerevolutionarytinderserver.dao.PersonDAOImp;
+import ru.liga.prerevolutionarytinderserver.dao.RelationshipsDAOImp;
 import ru.liga.prerevolutionarytinderserver.dto.PersonDto;
 import ru.liga.prerevolutionarytinderserver.entity.Person;
 import ru.liga.prerevolutionarytinderserver.entity.Relationships;
 import ru.liga.prerevolutionarytinderserver.type.FavoriteStatus;
 import ru.liga.prerevolutionarytinderserver.type.Gender;
 
-import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,80 +23,54 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PersonServiceImp implements PersonService {
 
-    private final PersonDAO personDao;
-    private final RelationshipsDAO relationshipsDAO;
+    private static final int TWO_ROWS = 2;
+    private static final int ONE_ROWS = 1;
+    private static final int ZERO = 0;
+    private final PersonDAOImp personDao;
+    private final RelationshipsDAOImp relationshipsDAO;
+    private final PersonMapper personMapper;
 
-    private final PictureWebService pictureWebService;
 
-
-    public ResponseEntity getPersonById(Long id) {
-        log.info("Was calling getPersonById. Input id: " + id);
-        return ResponseEntity.ok(personDao.findPersonById(id));
-    }
-
-    public ResponseEntity getPersonPicture(Long id) {
-        log.info("Was calling getPersonPicture. Input id: " + id);
-        return ResponseEntity.ok(pictureWebService.makePicture(personDao.findPersonById(id).getDescription()));
+    public Person getPersonById(Long id) {
+        log.info("Was calling getPersonById. Input id: {}", id);
+        return personDao.findPersonById(id);
     }
 
     public Person addNewPerson(Person person) {
-        log.info("Was calling addNewPerson. Input person: " + person);
+        log.info("Was calling addNewPerson. Input person: {}", person);
         return personDao.addPerson(person);
     }
 
     @Override
     public PersonDto getPersonFormById(Long id) {
-        log.info("Was calling getPersonFormById. Input id: " + id);
-
+        log.info("Was calling getPersonFormById. Input id: {}", id);
         Person person = personDao.findPersonById(id);
-        PersonDto personDto = PersonDto.builder()
-                .id(person.getId())
-                .picture(getPicture(person.getDescription()))
-                .caption(person.getGender() + ", " + person.getName())
-                .build();
+        PersonDto personDto = personMapper.personToPersonDto(person);
         return personDto;
     }
 
-
-    public Page<Person> getPersons(PageRequest pageRequest) {
-        log.info("Was calling getPersonById");
-        return personDao.findPersons(pageRequest);
-    }
-
-    public PersonDto getPersonsLikedByMe(Long id, PageRequest pageRequest) {
-        log.info("Was calling getPersonsLikedByMe");
+    public PersonDto getMyLikePersonsList(Long id, PageRequest pageRequest) {
+        log.info("Was calling getMyLikePersonsList. Input id: {}", id);
         Page<Person> personPage = personDao.findMyLikeList(id, pageRequest);
-        Person person = personPage.getContent().get(0);
-        String status = getStatus(id, person.getId());
-        PersonDto personDto = PersonDto.builder()
-                .id(person.getId())
-                .picture(getPicture(person.getDescription()))
-                .caption(person.getGender() + ", " + person.getName() + ", " + status)
-                .totalPage(personPage.getTotalPages())
-                .currentPage(personPage.getNumber())
-                .build();
-
-        return personDto;
+        if (personPage.getTotalPages() > ZERO) {
+            Person person = personPage.getContent().get(ZERO);
+            String status = getStatus(id, person.getId());
+            return personMapper.personToPersonDtoByLikeList(
+                    person,
+                    status,
+                    personPage.getTotalPages(),
+                    personPage.getNumber());
+        } else {
+            return null;
+        }
     }
 
     @Override
     public PersonDto getCandidateFavorites(Long id, PageRequest pageRequest) {
-        log.info("Was calling getPersonsLikedByMe");
-
-        Page<Person> personsPage = getCandidateFavorites(personDao.findPersonById(id), pageRequest);
-
-        if(personsPage.getTotalPages() > 0){
-
-        Person personResult = personsPage.getContent().get(0);
-
-            PersonDto personDto = PersonDto.builder()
-                    .id(personResult.getId())
-                    .picture(getPicture(personResult.getDescription()))
-                    .caption(personResult.getGender() + ", " + personResult.getName())
-                    .totalPage(personsPage.getTotalPages())
-                    .currentPage(personsPage.getNumber())
-                    .build();
-            return personDto;
+        log.info("Was calling getCandidateFavorites. Input id: {}", id);
+        Page<Person> personPage = getCandidateFavorites(personDao.findPersonById(id), pageRequest);
+        if (personPage.getTotalPages() > ZERO) {
+            return personMapper.personPageToPersonDto(personPage);
         } else {
             return null;
         }
@@ -109,16 +78,16 @@ public class PersonServiceImp implements PersonService {
 
     @Override
     public String addLikeFavorites(Long id, Long currentPersonId) {
-        relationshipsDAO.addRelationships(new Relationships(null,id,currentPersonId));
-        //проверяем есть ли взаимность, и если есть то проставляем флаги TRUE
-        if ( getStatus(id,currentPersonId).equals(FavoriteStatus.RECIPROCITY.getTranslate())) {
-            personDao.updateReciprocity(id, currentPersonId);
+        log.info("Was calling addLikeFavorites. Input id: {}  currentPersonId: {}", id, currentPersonId);
+        relationshipsDAO.addRelationships(new Relationships(null, id, currentPersonId));
+        if (getStatus(id, currentPersonId).equals(FavoriteStatus.RECIPROCITY.getTranslate())) {
+            relationshipsDAO.updateReciprocity(id, currentPersonId);
         }
-        return getStatus(id,currentPersonId);
+        return getStatus(id, currentPersonId);
     }
 
     private Page<Person> getCandidateFavorites(Person person, PageRequest pageRequest) {
-        log.debug("Was calling getCandidateFavorites");
+        log.debug("Was calling getCandidateFavorites. Input person: {}", person);
         if (Gender.GENTLEMEN.getTranslate().equals(person.getPreference())) {
             return personDao.findCandidateFavoritesByMe(
                     person.getId(),
@@ -142,21 +111,16 @@ public class PersonServiceImp implements PersonService {
     }
 
     private String getStatus(Long personId, Long selectedPersonId) {
-        log.debug("Was calling getStatus");
-        if (personDao.checkReciprocity(personId, selectedPersonId) == 2) {
+        log.debug("Was calling getStatus. Input personId: {} selectedPersonId: {}", personId, selectedPersonId);
+        if (personDao.checkReciprocity(personId, selectedPersonId) == TWO_ROWS) {
             return FavoriteStatus.RECIPROCITY.getTranslate();
         }
-        if (personDao.countLikedByMe(personId, selectedPersonId) == 1) {
+        if (personDao.countLikedByMe(personId, selectedPersonId) == ONE_ROWS) {
             return FavoriteStatus.LIKE_BE_ME.getTranslate();
         }
-        if (personDao.countYouLikeMe(personId, selectedPersonId) == 1) {
+        if (personDao.countYouLikeMe(personId, selectedPersonId) == ONE_ROWS) {
             return FavoriteStatus.YOU_LIKE_ME.getTranslate();
         }
         return null;
-    }
-
-    private byte[] getPicture(String description) {
-        log.debug("Was calling getPicture");
-        return pictureWebService.makePicture(description);
     }
 }

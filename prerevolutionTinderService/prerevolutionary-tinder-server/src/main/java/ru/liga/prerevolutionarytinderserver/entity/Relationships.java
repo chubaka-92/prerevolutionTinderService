@@ -5,12 +5,13 @@ import lombok.*;
 
 import javax.persistence.*;
 
-@Entity
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@Builder
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
 @Table(name = "person_intersect")
 public class Relationships {
 

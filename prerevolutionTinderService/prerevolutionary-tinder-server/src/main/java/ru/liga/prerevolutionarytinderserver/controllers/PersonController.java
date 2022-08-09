@@ -15,47 +15,44 @@ import ru.liga.prerevolutionarytinderserver.entity.Person;
 @RequestMapping("/persons")
 public class PersonController {
 
+    private static final int PAGE_SIZE = 1;
     private final PersonService personService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPerson(@PathVariable("id") Long id) {
-        log.info("Was calling getPerson. Input id: " + id);
-        return personService.getPersonById(id);
+    public ResponseEntity<Person> getPerson(@PathVariable("id") Long id) {
+        log.info("Was calling getPerson. Input id: {}", id);
+        return ResponseEntity.ok(personService.getPersonById(id));
     }
 
     @GetMapping("/form/{id}")
     public ResponseEntity<PersonDto> getPersonForm(@PathVariable("id") Long id) {
-        log.info("Was calling getPersonForm. Input id: " + id);
+        log.info("Was calling getPersonForm. Input id: {}", id);
         return ResponseEntity.ok(personService.getPersonFormById(id));
     }
 
     @PostMapping()
     public ResponseEntity<Person> createPerson(@RequestBody Person person) {
-        log.info("Was calling createPerson. Input person: " + person);
+        log.info("Was calling createPerson. Input person: {}", person);
         return ResponseEntity.ok(personService.addNewPerson(person));
     }
 
     @GetMapping("/favorites/{id}/pages/{page}")
     public ResponseEntity<PersonDto> getPersonsLikedByMe(@PathVariable("id") Long id, @PathVariable("page") int page) {
-        log.info("Was calling getPersons.");
-
-        PageRequest pageRequest = PageRequest.of(page, 1);
-
-        return ResponseEntity.ok(personService.getPersonsLikedByMe(id, pageRequest));
+        log.info("Was calling getPersonsLikedByMe. Input id: {} page: {}", id, page);
+        PageRequest pageRequest = PageRequest.of(page, PAGE_SIZE);
+        return ResponseEntity.ok(personService.getMyLikePersonsList(id, pageRequest));
     }
 
     @GetMapping("/{id}/search/pages/{page}")
     public ResponseEntity<PersonDto> getCandidateFavorites(@PathVariable("id") Long id, @PathVariable("page") int page) {
-        log.info("Was calling getPersons.");
-
-        PageRequest pageRequest = PageRequest.of(page, 1);
-
+        log.info("Was calling getPersons. Input id: {} page: {}", id, page);
+        PageRequest pageRequest = PageRequest.of(page, PAGE_SIZE);
         return ResponseEntity.ok(personService.getCandidateFavorites(id, pageRequest));
     }
 
     @PostMapping("/{id}/search/")
-    public ResponseEntity<String> createLikeFavorites(@PathVariable("id") Long id,@RequestBody Long currentPersonId) {
-        log.info("Was calling createLikeFavorites. Input userId: {} currentPersonId: {}",id,currentPersonId);
-        return ResponseEntity.ok(personService.addLikeFavorites(id,currentPersonId));
+    public ResponseEntity<String> createLikeFavorites(@PathVariable("id") Long id, @RequestBody Long currentPersonId) {
+        log.info("Was calling createLikeFavorites. Input userId: {} currentPersonId: {}", id, currentPersonId);
+        return ResponseEntity.ok(personService.addLikeFavorites(id, currentPersonId));
     }
 }
