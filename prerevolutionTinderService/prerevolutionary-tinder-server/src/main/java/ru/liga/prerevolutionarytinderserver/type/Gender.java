@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Gender {
-    SIR("Сударь"),
+    SIR("Сударъ"),
     MADAM("Сударыня"),
 
     LADIES("Сударыни"),

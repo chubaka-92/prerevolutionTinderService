@@ -13,7 +13,7 @@ import ru.liga.prerevolutionarytinderserver.api.PictureWebService;
 @Service
 public class PictureWebServiceImp implements PictureWebService {
 
-    private final String createPersonUrl = "https://pict-serv-2-0-fixey-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com/pict";
+    private final String createPersonUrl = "http://localhost:5002/pict";
 
     public byte[] makePicture(String text) {
         log.info("Was calling makePicture. Input text: {}", text);

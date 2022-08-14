@@ -38,9 +38,9 @@ public class ReplyKeyboardMaker {
  */
     public ReplyKeyboardMarkup getSearchKeyboard() {
         KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton(Buttons.SEARCH_LEFT_BUTTON.getButtonName()));
+        row1.add(new KeyboardButton(Buttons.LEFT_BUTTON.getButtonName()));
         row1.add(new KeyboardButton(Buttons.MENU_BUTTON.getButtonName()));
-        row1.add(new KeyboardButton(Buttons.SEARCH_RIGHT_BUTTON.getButtonName()));
+        row1.add(new KeyboardButton(Buttons.RIGHT_BUTTON.getButtonName()));
 
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(row1);
@@ -59,9 +59,9 @@ public class ReplyKeyboardMaker {
      */
     public ReplyKeyboardMarkup getProfileKeyboard() {
         KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton(Buttons.MENU_BUTTON.getButtonName()));
         row1.add(new KeyboardButton(Buttons.MY_PROFILE.getButtonName()));
-        row1.add(new KeyboardButton(Buttons.CHANGE_BUTTON.getButtonName()));
+        row1.add(new KeyboardButton(Buttons.SEARCH_BUTTON.getButtonName()));
+        row1.add(new KeyboardButton(Buttons.FAVORITE_BUTTON.getButtonName()));
 
 
         List<KeyboardRow> keyboard = new ArrayList<>();
