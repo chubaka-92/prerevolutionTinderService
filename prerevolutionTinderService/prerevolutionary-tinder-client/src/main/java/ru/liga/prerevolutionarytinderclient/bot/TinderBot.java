@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -55,10 +56,14 @@ public class TinderBot extends SpringWebhookBot {
     }
 
     private BotApiMethod<?> handleUpdate(Update update) {
-        Message message = update.getMessage();
-        if (message != null) {
-            BotApiMethod<?> left = messageHandler.answerMessage(update.getMessage());
-            return left;
+        if (update.hasCallbackQuery()) {
+            CallbackQuery callbackQuery = update.getCallbackQuery();
+            return callbackQueryHandler.processCallbackQuery(callbackQuery);
+        } else {
+            Message message = update.getMessage();
+            if (message != null) {
+                return messageHandler.answerMessage(update.getMessage());
+            }
         }
         return null;
     }
@@ -77,6 +82,7 @@ public class TinderBot extends SpringWebhookBot {
             throw new RuntimeException("Ошибка: невозможно отправить файл.");
         }
     }
+
     /**
      * Метод реализует отправление сообщеня по запросу.
      *

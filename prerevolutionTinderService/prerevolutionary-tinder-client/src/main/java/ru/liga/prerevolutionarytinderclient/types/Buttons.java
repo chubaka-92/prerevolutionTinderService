@@ -1,5 +1,8 @@
 package ru.liga.prerevolutionarytinderclient.types;
 
+import lombok.Getter;
+
+@Getter
 public enum Buttons {
     LEFT_BUTTON("<--Лево"),
     RIGHT_BUTTON("Право-->"),
@@ -8,12 +11,9 @@ public enum Buttons {
     SEARCH_BUTTON("Поиск"),
     FAVORITE_BUTTON("Любимцы"),
 
-    SEARCH_LEFT_BUTTON("<-Лево"),
-    SEARCH_RIGHT_BUTTON("Право->"),
-
     CHANGE_BUTTON("Изменить"),
 
-    SIR("Сударь"),
+    SIR("Сударъ"),
     MADAM("Сударыня"),
 
     LADIES("Сударыни"),
