@@ -1,0 +1,45 @@
+<configuration debug="true">
+    <timestamp key="timestamp" datePattern="ddMMyyyy"/>
+    <property name="log.maxHistory" value="7"/>
+    <property name="log.filePath" value="./logs"/>
+    <property name="log.pattern"
+              value="%d{dd-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level %logger{50} -%M - %msg%n"/>
+
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="fileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.filePath}/log_${timestamp}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.filePath}/log_%d{yyyy-MM-dd}.log
+            </fileNamePattern>
+            <maxHistory>${log.maxHistory}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <root lavel="debug">
+        <appender-ref ref="fileAppender"/>
+        <appender-ref ref="consoleAppender"/>
+    </root>
+<!--    <logger  name="ru.liga" level="debug" additivity="false">-->
+<!--        <appender-ref ref="fileAppender"/>-->
+<!--        <appender-ref ref="consoleAppender"/>-->
+<!--    </logger>-->
+<!--    <logger name="ru.liga" level="ERROR" additivity="false">-->
+<!--        <appender-ref ref="consoleAppender"/>-->
+<!--        <appender-ref ref="fileAppender"/>-->
+<!--    </logger>-->
+
+<!--    <logger name="ru.liga" level="INFO" additivity="false">-->
+<!--        <appender-ref ref="consoleAppender"/>-->
+<!--        <appender-ref ref="fileAppender"/>-->
+<!--    </logger>-->
+
+
+</configuration>

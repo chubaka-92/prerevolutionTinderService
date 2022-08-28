@@ -7,14 +7,19 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="prerevolutionTinderService" />
         <module name="prerevolutionary-tinder-client" />
         <module name="prerevolutionary-tinder-server" />
+        <module name="oldpictserv" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="picture-service-2" target="11" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="oldpictserv" options="-parameters" />
+      <module name="picture-service-2" options="-parameters" />
       <module name="prerevolutionary-tinder-client" options="-parameters" />
       <module name="prerevolutionary-tinder-server" options="-parameters" />
     </option>

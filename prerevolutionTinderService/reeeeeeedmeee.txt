@@ -1,0 +1,6 @@
+запуск:
+
+1) запускаем docker-compose.yml (разворачиваем БД)
+2) запускаем сервис по генерации картинки. Модуль picture-service-2 класс - OldpictservApplication.java
+3) запускаем сервер тиндера. Модуль prerevolutionary-tinder-server класс - PrerevolutionaryTinderServerApplication.java
+4) запускаем клиент тиндера. Модуль prerevolutionary-tinder-client класс - PrerevolutionaryTinderClientApplication.java
